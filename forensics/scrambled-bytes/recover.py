@@ -4,13 +4,13 @@ import sys
 import random
  
 SEED = 1614044650
-INFILE = 'data.txt'
+INFILE = 'payload.txt'
 OUTFILE = 'recovered.dat'
 
 # Parse the source port -> payload byte file
 ports = []
 data = bytearray() 
-with open('payload.txt', 'r') as f:
+with open(INFILE, 'r') as f:
     for line in f.readlines():
         split = line.split()
         if len(split) != 2:

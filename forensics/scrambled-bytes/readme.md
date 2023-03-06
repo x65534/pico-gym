@@ -3,9 +3,9 @@ We are given two files, a packet capture, and the Python script used to scramble
 Analyzing the `send.py` script, we can see that it performs the following steps:
 - Seeds `random` with the current `time`.
 - Shuffles the payload with `random.shuffle`.
-- Sends each byte of the payload over UDP in its own datagram. It uses `random` to generate the source port and a value to XOR with the payload.
+- Sends each byte of the payload over UDP in its own datagram. It uses `random.randrange` to generate the source port and a value to XOR with the payload.
 
-Since the random number generated is seeded with the current time, this means if we know the time that the payload was sent, we can generate the same sequence of psuedo-random values originally used to shuffle and encrypt the payload. This will allow us to decrypt and unshuffle the data.
+Since the random number generator is seeded with the current time, this means if we know the time that the payload was sent, we can generate the same sequence of psuedo-random values originally used to shuffle and encrypt the payload. This will allow us to decrypt and unshuffle the data.
 
 Taking a look at the log in Wireshark and filtering for `udp`, we see many packets being sent with a length of 1.
 ![](img/scrambled-bytes-1.png)
@@ -44,14 +44,14 @@ If we remove the length check from the Wireshark filter, it reveals extra packet
 
 ![](img/scrambled-bytes-4.png)
 ![](img/scrambled-bytes-5.png)
-We can see that there is only 1 byte of data, however the field is reported as `kink.type`, so we can't extract it by specifying `data`. That's also why it didn't show up when we filtered on `len(data)==1.
+We can see that there is only 1 byte of data, however the field is reported as `kink.type`, so we can't extract it by specifying `data`. That's also why it didn't show up when we filtered on `len(data)==1`.
 
 To get around this, we can instruct tshark to decode these packets as raw data. Since the destination port of each packet is the same, we can specify that all UDP packets sent to that port should be decoded as raw data, with `-d udp.port==56742,data`.
 
-With this in place, we re-extract the payload:
-`tshark -r capture.pcapng -d udp.port==56742,data -T fields -e udp.srcport -e data 'udp && !icmp && len(data)==1' > data.txt`
+With this in place, we re-extract the payload:\
+`tshark -r capture.pcapng -d udp.port==56742,data -T fields -e udp.srcport -e data 'udp && !icmp && len(data)==1' > payload.txt`
 
 Now when we re-run the script, there are no mismatches: `Wrote 1992 byte(s) to recovered.dat`.
 
-Using `file` to inspect the data reveals that is is a PNG image, which contains the flag.
+Using `file` to inspect the data reveals that is is a PNG image, which contains the flag.\
 `recovered.dat: PNG image data, 426 x 240, 1-bit grayscale, non-interlaced`
