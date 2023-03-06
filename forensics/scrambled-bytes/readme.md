@@ -33,7 +33,7 @@ This gives us a file in the following format:
 ```
 *source port -> hexadecimal payload byte*
 
-I wrote the `recover.py` script that attempts to recover the original data. If the randomly generated port does not match the extracted port, it reports where the mismatch is and fails.
+I wrote the [`recover.py`](recover.py) script that attempts to recover the original data. If the randomly generated port does not match the extracted port, it reports where the mismatch is and fails.
 
 When we run the script, it reports a mismatch.\
 `Port mismatch on line 17, expected 910, was 45552`
